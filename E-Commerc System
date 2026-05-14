@@ -1,0 +1,190 @@
+from abc import ABC, abstractmethod
+
+class product(ABC):
+
+    def __init__(self,id_number,name,price,stock) :
+        self.__id_number = id_number
+        self.__name = name
+        self.set_price(price)
+        self.set_stock(stock)
+
+    def get_id_number(self):
+        return self.__id_number
+
+    def get_name(self):
+        return self.__name
+
+    def get_price(self):
+        return self.__price
+
+    def get_stock(self):
+        return self.__stock
+
+    
+
+    def set_price(self,price):
+        if price < 0:
+            print ("Error: negative price.")
+        else:
+            self.__price = price
+
+    def set_stock(self,stock):
+        if stock < 0:
+            print ("Error: negative number.")
+        else:
+            self.__stock = stock
+
+    def reduce_stock (self,quantity):
+
+        if quantity <= self.__stock:
+            self.__stock -= quantity
+        elif  quantity ==0 :
+            print (" wait for thr restock")
+
+    @abstractmethod
+    def apply_discount(self):
+        pass
+
+    @abstractmethod
+    def display_info(self):
+        pass
+
+class physical_product(product):
+    def __init__(self,id_number,name,price,stock,shipping_cost) :
+        super().__init__(id_number,name,price,stock)
+        self.shipping_cost= shipping_cost
+
+    def apply_discount(self) :
+        discount = self.get_price() * 0.1
+        self.set_price(self.get_price() - discount)
+        return self.get_price()
+
+    def display_info(self):
+        print(f"""ID: {self.get_id_number()}
+          type : physical product
+         Name: {self.get_name()}
+        Price: {self.get_price()}
+       Stock: {self.get_stock()}
+      Shipping Cost: {self.shipping_cost}$""")
+
+
+class digital_product(product):
+    def __init__(self,id_number,name,price,stock,download_link) :
+        super().__init__(id_number,name,price,stock)
+        self.download_link= download_link
+
+    def apply_discount(self) :
+        discount = self.get_price() * 0.1
+        self.set_price(self.get_price() - discount)
+        return self.get_price()
+
+    def display_info(self):
+        print(f"""ID: {self.get_id_number()}
+            type : digital product
+         Name: {self.get_name()}
+        Price: {self.get_price()}
+       Stock: {self.get_stock()}
+       """)
+class shopping_cart:
+    def __init__(self) :
+        self.cart_items= []
+    def add_item (self,product):
+        if product.get_stock() > 0:
+         self.cart_items.append(product)
+         product.reduce_stock(1)
+         print (f"Added {product.get_name()} to the cart.")
+        else :
+            print (f"Sorry, {product.get_name()} is out of stock, wait for thr restock ")
+
+    def view_cart(self):
+        if not self.cart_items:
+            print("Your cart is empty,Add items and they will appear here")
+        else:
+            print("Items in your cart:")
+            for item in self.cart_items:
+                print(f"- {item.get_name()} (${item.get_price()})")
+
+    def checkout (self):
+        if not self.cart_items:
+            print("Your cart is empty,Add items and they will appear here")
+            return 0 
+        else:
+            total = sum(item.get_price() for item in self.cart_items)
+            print(f"Total amount: ${total}")
+            print("Thank you for your purchase!")
+            
+ 
+
+
+products = [
+    physical_product (1, "Laptop", 1000, 5, 25),
+    physical_product (2, "Headphones", 200, 10, 10),
+    digital_product (3, "Python Course", 100, 20, "link"),
+    digital_product (4, "E-Book", 50, 15, "link")
+]
+
+def display_products(products):
+    print ("Available Products \n")
+    for product in products:
+        product.display_info()
+        print("----------------------------")
+
+cart = shopping_cart()
+
+while True:
+
+    print("""
+-------------- Smart E-Commerce System--------------
+1. View Products
+2. Add Product to Cart
+3. View Cart
+4. Checkout
+5. Exit
+------------------------------------------------
+""")
+ 
+   
+    try:
+
+        choice = int(input("Enter your choice: "))
+
+        
+        if choice == 1:
+            display_products(products)
+
+
+        elif choice == 2:
+
+            product_input = input(
+                "Enter Product ID or Product Name: ").strip()
+
+            found = False
+
+            for product in products:
+
+                if (str(product.get_id_number()) == product_input
+                   or
+                        product.get_name().lower() == product_input.lower()):
+
+                    cart.add_item(product)
+                    found = True
+                    break
+
+            if not found:
+                print("Product not found.")
+
+        elif choice == 3:
+            cart.view_cart()
+
+        elif choice == 4:
+            cart.checkout()
+
+        elif choice == 5:
+            print("Thank you for using the system. Goodbye!")
+            break
+
+        else:
+            print("ERROR. Please enter a number from 1 to 5.")
+
+    except ValueError:
+            print("ERROR. Please enter a valid number.")
